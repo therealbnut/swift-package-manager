@@ -38,7 +38,10 @@ class HandlerTest {
     }
 
     func run() {
-        // Block.
+        // Block for a timeout, to prevent tests hanging.
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+            fatalError("Failed to exit cleanly")
+        }
         dispatchMain()
     }
 }

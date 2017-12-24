@@ -484,8 +484,8 @@ public class SwiftTool<Options: ToolOptions> {
 
         // Run llbuild and print output on standard streams.
         let process = Process(arguments: args, environment: env, redirectOutput: false)
-        try process.launch()
         try processSet.add(process)
+        try process.launch()
         let result = try process.waitUntilExit()
 
         guard result.exitStatus == .terminated(code: 0) else {

@@ -361,6 +361,7 @@ final class TestRunner {
         var success = false
         do {
             let process = Process(arguments: args(), redirectOutput: true, verbose: false)
+            try processSet.add(process)
             try process.launch()
             let result = try process.waitUntilExit()
             output = try (result.utf8Output() + result.utf8stderrOutput()).chuzzle() ?? ""

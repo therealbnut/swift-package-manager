@@ -16,8 +16,6 @@ import TestSupport
 
 class InterruptHandlerTests: XCTestCase {
     func testBasics() throws {
-        // Disabled because it sometimes hangs the CI, possibly due to https://bugs.swift.org/browse/SR-5042
-      #if false
         mktmpdir { path in
             let exec = SwiftPMProduct.TestSupportExecutable.path.asString
             let waitFile = path.appending(component: "waitFile")
@@ -27,10 +25,11 @@ class InterruptHandlerTests: XCTestCase {
                 return XCTFail("Couldn't launch the process")
             }
             process.signal(SIGINT)
+            // FIXME: Called twice due to SIGINT bugs https://bugs.swift.org/browse/SR-5042
+            process.signal(SIGINT)
             let result = try process.waitUntilExit()
             XCTAssertEqual(try result.utf8Output(), "Hello from handler!\n")
         }
-      #endif
     }
 
     static var allTests = [

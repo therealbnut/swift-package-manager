@@ -115,6 +115,12 @@ public final class ProcessSet {
             for process in self.processes {
                 process.signal(signal)
             }
+            // FIXME: Called twice due to SIGINT bugs https://bugs.swift.org/browse/SR-5042
+            if signal == SIGINT {
+                for process in self.processes {
+                    process.signal(signal)
+                }
+            }
         }
     }
 }
