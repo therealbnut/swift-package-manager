@@ -119,16 +119,3 @@ private struct AffectedResult: Codable {
     var sources: [String]
     var dependencies: [String]
 }
-
-private extension ResolvedTarget.Dependency {
-    func hasDependency(in targets: Set<ResolvedTarget>) -> Bool {
-        if let target = self.target, targets.contains(target) {
-            return true
-        }
-        return false
-    }
-}
-
-private func compareName(_ lhs: ResolvedTarget, _ rhs: ResolvedTarget) -> Bool {
-    return lhs.name < rhs.name
-}
