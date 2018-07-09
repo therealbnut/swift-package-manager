@@ -116,6 +116,15 @@ public class SwiftPackageTool: SwiftTool<PackageToolOptions> {
                 diagnostics: diagnostics
             )
 
+        case .affectedTargets:
+            let cwd = localFileSystem.currentWorkingDirectory!
+            let graph = try loadPackageGraph()
+            let files = options.affectedTargetsInputs.map {
+                AbsolutePath($0, relativeTo: cwd)
+            }
+            dumpAffectedTargetsOf(graph: graph,
+                                  files: files,
+                                  mode: options.showDepsMode)
         case .showDependencies:
             let graph = try loadPackageGraph()
             dumpDependenciesOf(rootPackage: graph.rootPackages[0], mode: options.showDepsMode)
@@ -289,6 +298,23 @@ public class SwiftPackageTool: SwiftTool<PackageToolOptions> {
             to: {
                 $0.showDepsMode = $1})
 
+        let affectedTargetsParser = parser.add(
+            subparser: PackageMode.affectedTargets.rawValue,
+            overview: "Print the targets affected by the passed files")
+        binder.bind(
+            option: affectedTargetsParser.add(
+                option: "--format", kind: AffectedTargetsMode.self,
+                usage: "text|dot|json|flatlist"),
+            to: {
+                $0.showDepsMode = $1})
+        binder.bind(
+            option: affectedTargetsParser.add(
+                option: "--files",
+                kind: [String].self,
+                usage: "The files affecting the targets",
+                completion: .filename),
+            to: { $0.affectedTargetsInputs = $1 })
+
         let toolsVersionParser = parser.add(
             subparser: PackageMode.toolsVersion.rawValue,
             overview: "Manipulate tools version of the current package")
@@ -393,6 +419,8 @@ public class PackageToolOptions: ToolOptions {
     var inputPath: AbsolutePath?
     var showDepsMode: ShowDependenciesMode = .text
 
+    var affectedTargetsInputs: [String] = []
+
     struct EditOptions {
         var packageName: String?
         var revision: String?
@@ -442,6 +470,7 @@ public enum PackageMode: String, StringEnumArgument {
     case reset
     case resolve
     case showDependencies = "show-dependencies"
+    case affectedTargets = "affected-targets"
     case toolsVersion = "tools-version"
     case unedit
     case update
@@ -473,6 +502,9 @@ extension ShowDependenciesMode: StringEnumArgument {
         ])
     }
 }
+
+// Temporary for POC.
+typealias AffectedTargetsMode = ShowDependenciesMode
 
 extension DescribeMode: StringEnumArgument {
     public static var completion: ShellCompletion {
